@@ -1,0 +1,18 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="error-404">
+        <div class="error-code">Access Denied</div>
+        <div class="error-message">Oops! You don't have permission to view this content. Please sign in to gain access and explore all the exclusive features.</div>
+        <a href="{% url 'login' %}" class="home-button">Sign In</a>
+    </div>
+</body>
+</html>

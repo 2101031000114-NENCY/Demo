@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'messages.js' %}"></script>
+</head>
+<body>
+    <div class="wrapper profile-card">
+        <h2>Verification</h2>
+        <form method="post" class="form-wrapper">
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" name="otp" id="otp" maxlength="6" required>
+            </div>
+            <button type="submit">Verify</button>
+            <button type="submit" name="resend_otp">Resend OTP</button>
+        </form>
+    </div>
+    {% if messages %}
+        <div class="message-footer">
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>

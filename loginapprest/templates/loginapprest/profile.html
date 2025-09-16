@@ -1,0 +1,102 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'messages.js' %}"></script>
+</head>
+<body>
+    <div class="header">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'change_password' %}">Change Password</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="wrapper profile-card">
+        {% if request.GET.edit == 'true' %}
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-wrapper">
+                    <div class="profile-header">
+                        <label for="profile-image-input">
+                            {% if user.userprofile.image %}
+                                <img src="{{ user.userprofile.image.url }}" alt="Profile Image" class="profile-image">
+                            {% else %}
+                                <img src="{% static 'user.png' %}" alt="Default Profile Image" class="profile-image">
+                            {% endif %}
+                        </label>
+                        <input type="file" id="profile-image-input" name="image" style="display: none;" accept="image/*" onchange="this.form.submit()">
+                        <div class="username-display">{{ user.username }}</div>
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{ user.userprofile.email|default:user.email }}" readonly>
+                    </div>
+
+                    {% comment %} <div class="input-group">
+                        <label>Username</label>
+                        <input type="username" name="username" value="{{ user.userprofile.username|default:user.username }}">
+                    </div> {% endcomment %}
+
+                    <div class="input-group">
+                        <label>Name</label>
+                        {{ form.name }}
+                    </div>
+
+                    <div class="input-group">
+                        <label>Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select name="gender" id="id_gender">
+                            <option value="M" {% if user.userprofile.gender == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if user.userprofile.gender == 'F' %}selected{% endif %}>Female</option>
+                            <option value="O" {% if user.userprofile.gender == 'O' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        {% else %}
+            <div class="profile-wrapper">
+                <img src="{% if user.userprofile.image %}{{ user.userprofile.image.url }}{% else %}{% static 'user.png' %}{% endif %}" alt="Profile Image" class="profile-image">
+                <h2>{{ user.username }}</h2>
+                <div class="profile-details">
+                    <p>Email: {{ user.userprofile.email|default:user.email }}</p>
+                    <div class="profile-details">
+                        {% if user.userprofile.name %}
+                            Name: {{ user.userprofile.name }}
+                        {% endif %}
+                    </div>
+                    <div class="profile-details">
+                        {% if user.userprofile.phone %}
+                            Phone Number: {{ user.userprofile.phone }}
+                        {% endif %}
+                    </div>
+                    <div class="profile-details">
+                        {% if user.userprofile.gender %}
+                            Gender: {{ user.userprofile.get_gender_display }}
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'profile' %}?edit=true" class="btn">Edit</a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+        <div class="message-footer">
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+</body>
+</html>

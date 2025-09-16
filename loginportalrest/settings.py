@@ -6,15 +6,27 @@
 from pathlib import Path
 import datetime
 
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'DJANGO_SECRET_KEY1'
 
+
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -59,6 +71,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'loginportalrest.wsgi.application'
 
+
+
+
 # Database
 DATABASES = {
     'default': {
@@ -102,20 +117,32 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
+
 # Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'loginapprest/static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
+
+
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+
+
 # Authentication
 LOGIN_URL = '/login/'
+
+
 
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -125,8 +152,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '2101031000114@silveroakuni.ac.in'
 EMAIL_HOST_PASSWORD = 'hdls sxou fqwk mrjl'
 
+
+
 # Sessions
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
+
 
 # Rest_framework
 REST_FRAMEWORK = {

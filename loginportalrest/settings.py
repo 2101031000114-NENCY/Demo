@@ -79,6 +79,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -128,3 +145,13 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+
+
+
+
+
+
+
+
+

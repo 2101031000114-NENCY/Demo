@@ -4,16 +4,6 @@ from django.core.validators import RegexValidator
 from .models import UserProfile, OTP
 import re
 
-
-
-
-
-
-
-
-
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -31,24 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email is already registered.")
         return value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -89,16 +61,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-
-
-
-
-
-
-
-
-
 class OTPSerializer(serializers.ModelSerializer):
     class Meta:
         model = OTP
@@ -109,29 +71,6 @@ class OTPSerializer(serializers.ModelSerializer):
         if not value.isdigit() or len(value) != 6:
             raise serializers.ValidationError("OTP must be a 6-digit number.")
         return value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required=True)
@@ -197,20 +136,6 @@ class RegisterSerializer(serializers.Serializer):
         user_profile = UserProfile.objects.create(user=user, **validated_data)
         return user_profile
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True, required=True)
     new_password1 = serializers.CharField(write_only=True, required=True)
@@ -240,18 +165,6 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError("New password cannot be the same as the current password.")
         return data
 
-
-
-
-
-
-
-
-
-
-
-
-
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
@@ -264,20 +177,6 @@ class ForgotPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("Email not found.")
         return value
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     otp = serializers.CharField(max_length=6, required=True)
@@ -286,23 +185,6 @@ class VerifyOTPSerializer(serializers.Serializer):
         if not value.isdigit() or len(value) != 6:
             raise serializers.ValidationError("OTP must be a 6-digit number.")
         return value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

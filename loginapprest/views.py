@@ -22,13 +22,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-
-
-
 logger = logging.getLogger(__name__)
-
-
-
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -42,10 +36,6 @@ class UserProfileForm(forms.ModelForm):
         if phone and UserProfile.objects.filter(phone=phone).exclude(user=self.instance.user).exists():
             raise forms.ValidationError("Phone number is already registered.")
         return phone
-
-
-
-
 
 class RegisterForm(forms.Form):
     username = forms.CharField(max_length=150, required=True)
@@ -96,9 +86,6 @@ class RegisterForm(forms.Form):
                 raise forms.ValidationError("Password must contain at least one lowercase letter.")
         return cleaned_data
 
-
-
-
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -124,8 +111,6 @@ def register_view(request):
     else:
         form = RegisterForm()
     return render(request, 'loginapprest/register.html', {'form': form})
-
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -162,15 +147,11 @@ def login_view(request):
     request.session['access_forgot_password'] = True               
     return render(request, 'loginapprest/login.html')
 
-
-
 def home_view(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login to access the dashboard.')
         return redirect('login')
     return render(request, 'loginapprest/home.html')
-
-
 
 def profile_view(request):    
     if not request.user.is_authenticated:
@@ -202,8 +183,6 @@ def profile_view(request):
     else:
         form = UserProfileForm(instance=user_profile)
     return render(request, 'loginapprest/profile.html', {'form': form, 'user': request.user})
-
-
 
 def forgot_password(request):
     if not request.session.get('access_forgot_password'):
@@ -237,8 +216,6 @@ def forgot_password(request):
             except User.DoesNotExist:
                 messages.error(request, 'Email not found.')
     return render(request, 'loginapprest/forgot_password.html', {})
-
-
 
 def verify_otp(request):
     if not request.session.get('reset_email'):
@@ -287,18 +264,6 @@ def verify_otp(request):
                 messages.error(request, 'Invalid OTP.')
     return render(request, 'loginapprest/verify_otp.html', {})
 
-
-
-
-
-
-
-
-
-
-
-
-
 class ResetPasswordForm(forms.Form):
     new_password = forms.CharField(widget=forms.PasswordInput, required=True, label="New Password")
     confirm_password = forms.CharField(widget=forms.PasswordInput, required=True, label="Confirm Password")
@@ -325,8 +290,6 @@ class ResetPasswordForm(forms.Form):
             raise forms.ValidationError("Passwords do not match.")
         return cleaned_data
 
-
-
 def reset_password(request):
     email = request.session.get('reset_email')
     if not email:
@@ -351,17 +314,6 @@ def reset_password(request):
     else:
         form = ResetPasswordForm()
     return render(request, 'loginapprest/reset_password.html', {'form': form})
-
-
-
-
-
-
-
-
-
-
-
 
 class CustomPasswordChangeForm(forms.Form):
     old_password = forms.CharField(widget=forms.PasswordInput, required=True, label="Current Password")
@@ -400,9 +352,6 @@ class CustomPasswordChangeForm(forms.Form):
                 raise forms.ValidationError("New password cannot be the same as the current password.")
         return cleaned_data
 
-
-
-
 def change_password_view(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login to change your password.')
@@ -426,21 +375,10 @@ def change_password_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'loginapprest/change_password.html', {'form': form, 'user': request.user})
 
-
-
 def logout_view(request):
     logout(request)
     messages.success(request, 'Logged out successfully!')
     return redirect('login')    
-
-
-
-
-
-
-
-
-
 
 class Custom404Middleware:
     def __init__(self, get_response):
@@ -457,15 +395,6 @@ class Custom404Middleware:
         if isinstance(exception, Http404):
             return render(request, '404.html', status=404)
         return None
-
-
-
-
-
-
-
-
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -488,16 +417,6 @@ def api_register_view(request):
         'status': 'error',
         'errors': serializer.errors
     }, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
-
-
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -525,17 +444,6 @@ def api_login_view(request):
         'message': 'Invalid username or password'
     }, status=status.HTTP_401_UNAUTHORIZED)
 
-
-
-
-
-
-
-
-
-
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_home_view(request):
@@ -544,12 +452,8 @@ def api_home_view(request):
         'message': 'Welcome to the dashboard'
     }, status=status.HTTP_200_OK)
 
-
-
-
-
-
-
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
 def api_profile_view(request):
     user = request.user
     try:
@@ -568,83 +472,37 @@ def api_profile_view(request):
 
     elif request.method == 'PUT':
         serializer = UserProfileSerializer(user_profile, data=request.data)
+        current_data = UserProfileSerializer(user_profile).data
+        new_data = request.data
+        data_changed = False
+
+        for field in new_data:
+            if field in current_data and new_data[field] != current_data[field]:
+                data_changed = True
+                break
+
         if serializer.is_valid():
-            serializer.save()
+            if data_changed:
+                serializer.save()
+                return Response({
+                    'status': 'success',
+                    'message': 'Profile updated successfully',
+                    'user': UserSerializer(user).data,
+                    'profile': serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'status': 'success',
+                    'message': 'No updates made to profile',
+                    'user': UserSerializer(user).data,
+                    'profile': serializer.data
+                }, status=status.HTTP_200_OK)
+        else:
             return Response({
-                'status': 'success',
-                'message': 'Profile updated successfully',
-                'data': serializer.data
-            }, status=status.HTTP_200_OK)
-
-        return Response({
-            'status': 'error',
-            'errors': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-# @api_view(['GET', 'PUT'])
-# @permission_classes([IsAuthenticated])
-# def api_profile_view(request):
-#     user = request.user
-#     try:
-#         user_profile = user.userprofile
-#     except UserProfile.DoesNotExist:
-#         user_profile = UserProfile.objects.create(user=user)
-
-#     if request.method == 'GET':
-#         serializer = UserSerializer(user)
-#         profile_serializer = UserProfileSerializer(user_profile)
-#         return Response({
-#             'status': 'success',
-#             'user': serializer.data,
-#             'profile': profile_serializer.data
-#         }, status=status.HTTP_200_OK)
-
-#     elif request.method == 'PUT':
-#         serializer = UserProfileSerializer(user_profile, data=request.data)
-#         current_data = UserProfileSerializer(user_profile).data
-#         new_data = request.data
-#         data_changed = False
-
-#         for field in new_data:
-#             if field in current_data and new_data[field] != current_data[field]:
-#                 data_changed = True
-#                 break
-
-#         if serializer.is_valid():
-#             if data_changed:
-#                 serializer.save()
-#                 return Response({
-#                     'status': 'success',
-#                     'message': 'Profile updated successfully',
-#                     'user': UserSerializer(user).data,
-#                     'profile': serializer.data
-#                 }, status=status.HTTP_200_OK)
-#             else:
-#                 return Response({
-#                     'status': 'success',
-#                     'message': 'No updates made to profile',
-#                     'user': UserSerializer(user).data,
-#                     'profile': serializer.data
-#                 }, status=status.HTTP_200_OK)
-#         else:
-#             return Response({
-#                 'status': 'error',
-#                 'errors': serializer.errors
-#             }, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
-
-
-
-
+                'status': 'error',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_change_password_view(request):
@@ -663,15 +521,6 @@ def api_change_password_view(request):
         'errors': serializer.errors
     }, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-
-
-
-
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_logout_view(request):   
@@ -679,3 +528,95 @@ def api_logout_view(request):
         'status': 'success',
         'message': 'Logged out successfully'
     }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_forgot_password(request):
+    serializer = ForgotPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        user = User.objects.get(email=email)
+        otp = get_random_string(length=6, allowed_chars='1234567890')
+        request.session['otp'] = otp
+        request.session['reset_email'] = email
+        request.session['otp_timestamp'] = time.time()
+        send_mail(
+            'Reset Password OTP',
+            f'Your OTP is: {otp}. It expires in 3 minutes.',
+            'your_sender_email@gmail.com',
+            [email],
+            fail_silently=False,
+        )
+        return Response({
+            'status': 'success',
+            'message': 'OTP sent to your email'
+        }, status=status.HTTP_200_OK)
+
+    return Response({
+        'status': 'error',
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_verify_otp(request):
+    serializer = VerifyOTPSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+
+        if not request.session.get('reset_email') == email:
+            return Response({
+                'status': 'error',
+                'message': 'Invalid session or email'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        otp_timestamp = request.session.get('otp_timestamp')
+
+        if otp_timestamp and (time.time() - otp_timestamp) > 180:
+            return Response({
+                'status': 'error',
+                'message': 'OTP has expired'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if otp == request.session.get('otp'):
+            del request.session['otp']
+            del request.session['otp_timestamp']
+            return Response({
+                'status': 'success',
+                'message': 'OTP verified successfully'
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'status': 'error',
+            'message': 'Invalid OTP'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        'status': 'error',
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_reset_password(request):
+    serializer = ResetPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+
+        if not request.session.get('reset_email') == email:
+            return Response({
+                'status': 'error',
+                'message': 'Invalid session or email'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.get(email=email)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        del request.session['reset_email']
+        return Response({
+            'status': 'success',
+            'message': 'Password reset successfully'
+        }, status=status.HTTP_200_OK)
+
+    return Response({
+        'status': 'error',
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
